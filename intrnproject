@@ -1,0 +1,169 @@
+1://Create MySQL Database Table
+CREATE TABLE IF NOT EXISTS `users` (
+`uid` int(11) NOT NULL AUTO_INCREMENT,
+`user` varchar(255) DEFAULT NULL,
+`pass` varchar(100) DEFAULT NULL,
+`email` varchar(255) DEFAULT NULL,
+`profile_photo` varchar(200) DEFAULT NULL,
+PRIMARY KEY (`uid`),
+UNIQUE KEY `username` (`user`),
+UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+2://Create MySQL Database Connection
+
+db_connect.php
+
+<?php
+/* Database connection start */
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "phpzag_demos";
+$conn = mysqli_connect($servername, $username, $password, $dbname) or die("Connection failed: " . mysqli_connect_error());
+if (mysqli_connect_errno()) {
+printf("Connect failed: %s\n", mysqli_connect_error());
+exit();
+}
+?>
+3:Include Bootstrap, jQuery and JavaScript Files
+
+ index.php
+ 
+ <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="script/validation.min.js"></script>
+<script type="text/javascript" src="script/login.js"></script>
+<link href="css/style.css" rel="stylesheet" type="text/css" media="screen">
+4:Create Register Form HTML
+
+index.php
+
+<div class="register_container">
+<form class="form-signin" method="post" id="register-form">
+<h2 class="form-signin-heading">User Registration Form</h2><hr />
+<div id="error">
+</div>
+<div class="form-group">
+<input type="text" class="form-control" placeholder="Username" name="user_name" id="user_name" />
+</div>
+<div class="form-group">
+<input type="email" class="form-control" placeholder="Email address" name="user_email" id="user_email" />
+<span id="check-e"></span>
+</div>
+<div class="form-group">
+<input type="password" class="form-control" placeholder="Password" name="password" id="password" />
+</div>
+<div class="form-group">
+<input type="password" class="form-control" placeholder="Retype Password" name="cpassword" id="cpassword" />
+</div>
+<hr />
+<div class="form-group">
+<button type="submit" class="btn btn-default" name="btn-save" id="btn-submit">
+<span class="glyphicon glyphicon-log-in"></span>   Create Account
+</button>
+</div>
+</form>
+</div>
+5:Form Validation and Submit with jQuery Ajax
+
+ registr.js  
+ 
+ $('document').ready(function() {
+/* handle form validation */
+$("#register-form").validate({
+rules:
+{
+user_name: {
+required: true,
+minlength: 3
+},
+password: {
+required: true,
+minlength: 8,
+maxlength: 15
+},
+cpassword: {
+required: true,
+equalTo: '#password'
+},
+user_email: {
+required: true,
+email: true
+},
+},
+messages:
+{
+user_name: "please enter user name",
+password:{
+required: "please provide a password",
+minlength: "password at least have 8 characters"
+},
+user_email: "please enter a valid email address",
+cpassword:{
+required: "please retype your password",
+equalTo: "password doesn't match !"
+}
+},
+submitHandler: submitForm
+});
+/* handle form submit */
+function submitForm() {
+var data = $("#register-form").serialize();
+$.ajax({
+type : 'POST',
+url : 'register.php',
+data : data,
+beforeSend: function() {
+$("#error").fadeOut();
+$("#btn-submit").html('<span class="glyphicon glyphicon-transfer"></span>   sending ...');
+},
+success : function(response) {
+if(response==1){
+$("#error").fadeIn(1000, function(){
+$("#error").html('<div class="alert alert-danger"> <span class="glyphicon glyphicon-info-sign"></span>   Sorry email already taken !</div>');
+$("#btn-submit").html('<span class="glyphicon glyphicon-log-in"></span>   Create Account');
+});
+} else if(response=="registered"){
+$("#btn-submit").html('<img src="ajax-loader.gif" />   Signing Up ...');
+setTimeout('$(".form-signin").fadeOut(500, function(){ $(".register_container").load("welcome.php"); }); ',3000);
+} else {
+$("#error").fadeIn(1000, function(){
+$("#error").html('<div class="alert alert-danger"><span class="glyphicon glyphicon-info-sign"></span>   '+data+' !</div>');
+$("#btn-submit").html('<span class="glyphicon glyphicon-log-in"></span>   Create Account');
+});
+}
+}
+});
+return false;
+}
+});
+6:Process User Register at Server end
+
+registr.php
+
+<?php
+include_once("../db_connect.php");
+if(isset($_POST['btn-save'])) {
+$user_name = $_POST['user_name'];
+$user_email = $_POST['user_email'];
+$user_password = $_POST['password'];
+$sql = "SELECT email FROM users WHERE email='$user_email'";
+$resultset = mysqli_query($conn, $sql) or die("database error:". mysqli_error($conn));
+$row = mysqli_fetch_assoc($resultset);
+if(!$row['email']){
+$sql = "INSERT INTO users(`uid`, `user`, `pass`, `email`, `profile_photo`) VALUES (NULL, '$user_name', '$user_password', '$user_email', NULL)";
+mysqli_query($conn, $sql) or die("database error:". mysqli_error($conn)."qqq".$sql);
+echo "registered";
+} else {
+echo "1";
+}
+}
+?>
+
+
+
+
+
+ 
