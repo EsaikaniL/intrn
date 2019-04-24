@@ -1,169 +1,406 @@
-1://Create MySQL Database Table
-CREATE TABLE IF NOT EXISTS `users` (
-`uid` int(11) NOT NULL AUTO_INCREMENT,
-`user` varchar(255) DEFAULT NULL,
-`pass` varchar(100) DEFAULT NULL,
-`email` varchar(255) DEFAULT NULL,
-`profile_photo` varchar(200) DEFAULT NULL,
-PRIMARY KEY (`uid`),
-UNIQUE KEY `username` (`user`),
-UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-2://Create MySQL Database Connection
-
-db_connect.php
-
+//.........partials/header.php..........//
 <?php
-/* Database connection start */
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "phpzag_demos";
-$conn = mysqli_connect($servername, $username, $password, $dbname) or die("Connection failed: " . mysqli_connect_error());
-if (mysqli_connect_errno()) {
-printf("Connect failed: %s\n", mysqli_connect_error());
-exit();
-}
+session_start();
 ?>
-3:Include Bootstrap, jQuery and JavaScript Files
-
- index.php
- 
- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+<!DOCTYPE html>
+<html>\
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="libs/common.css">
+<script type="text/javascript" charset="utf8" src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.0.3.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-<script type="text/javascript" src="script/validation.min.js"></script>
-<script type="text/javascript" src="script/login.js"></script>
-<link href="css/style.css" rel="stylesheet" type="text/css" media="screen">
-4:Create Register Form HTML
-
-index.php
-
-<div class="register_container">
-<form class="form-signin" method="post" id="register-form">
-<h2 class="form-signin-heading">User Registration Form</h2><hr />
-<div id="error">
-</div>
-<div class="form-group">
-<input type="text" class="form-control" placeholder="Username" name="user_name" id="user_name" />
-</div>
-<div class="form-group">
-<input type="email" class="form-control" placeholder="Email address" name="user_email" id="user_email" />
-<span id="check-e"></span>
-</div>
-<div class="form-group">
-<input type="password" class="form-control" placeholder="Password" name="password" id="password" />
-</div>
-<div class="form-group">
-<input type="password" class="form-control" placeholder="Retype Password" name="cpassword" id="cpassword" />
-</div>
-<hr />
-<div class="form-group">
-<button type="submit" class="btn btn-default" name="btn-save" id="btn-submit">
-<span class="glyphicon glyphicon-log-in"></span>   Create Account
-</button>
-</div>
-</form>
-</div>
-5:Form Validation and Submit with jQuery Ajax
-
- registr.js  
- 
- $('document').ready(function() {
-/* handle form validation */
-$("#register-form").validate({
-rules:
-{
-user_name: {
-required: true,
-minlength: 3
-},
-password: {
-required: true,
-minlength: 8,
-maxlength: 15
-},
-cpassword: {
-required: true,
-equalTo: '#password'
-},
-user_email: {
-required: true,
-email: true
-},
-},
-messages:
-{
-user_name: "please enter user name",
-password:{
-required: "please provide a password",
-minlength: "password at least have 8 characters"
-},
-user_email: "please enter a valid email address",
-cpassword:{
-required: "please retype your password",
-equalTo: "password doesn't match !"
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.17.0/jquery.validate.min.js"></script>
+<script type="text/javascript" src="libs/common.js"></script>
+<style>
+body {
+    font-size: 16px !important;
+    line-height: 25px !important;
 }
-},
-submitHandler: submitForm
-});
-/* handle form submit */
-function submitForm() {
-var data = $("#register-form").serialize();
-$.ajax({
-type : 'POST',
-url : 'register.php',
-data : data,
-beforeSend: function() {
-$("#error").fadeOut();
-$("#btn-submit").html('<span class="glyphicon glyphicon-transfer"></span>   sending ...');
-},
-success : function(response) {
-if(response==1){
-$("#error").fadeIn(1000, function(){
-$("#error").html('<div class="alert alert-danger"> <span class="glyphicon glyphicon-info-sign"></span>   Sorry email already taken !</div>');
-$("#btn-submit").html('<span class="glyphicon glyphicon-log-in"></span>   Create Account');
-});
-} else if(response=="registered"){
-$("#btn-submit").html('<img src="ajax-loader.gif" />   Signing Up ...');
-setTimeout('$(".form-signin").fadeOut(500, function(){ $(".register_container").load("welcome.php"); }); ',3000);
-} else {
-$("#error").fadeIn(1000, function(){
-$("#error").html('<div class="alert alert-danger"><span class="glyphicon glyphicon-info-sign"></span>   '+data+' !</div>');
-$("#btn-submit").html('<span class="glyphicon glyphicon-log-in"></span>   Create Account');
-});
-}
-}
-});
-return false;
-}
-});
-6:Process User Register at Server end
+</style>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
-registr.php
+  ga('create', 'UA-25916786-1', 'phpflow.com');
+  ga('send', 'pageview');
 
+</script>
+
+</head>
+<body class="">
+<div role="navigation" class="navbar navbar-default navbar-static-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button data-target=".navbar-collapse" data-toggle="collapse" class="navbar-toggle" type="button">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a href="#" class="navbar-brand"></a>
+        </div>
+        <div class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#">Home</a></li>
+           
+          </ul>
+         
+        </div><!--/.nav-collapse -->
+      </div>
+    </div>
+	
+	<div class="container" style="min-height:500px;">
+		   
+	<div class="row box" id="login-box">
+	<div class="col-md-6 col-md-offset-3">
+		<div class="panel panel-login">
+			<div class="alert alert-warning">
+				<ul>
+					<li>username : test@login.com</li>
+					<li>Password  : test123</li>
+				</ul>
+			</div>
+		<div class="panel-body">
+			<div class="row">
+				<div class="col-lg-12">
+				  <div class="alert alert-danger" role="alert" id="error" style="display: none;">...</div>
+				  <form id="login-form" name="login_form" role="form" style="display: block;" method="post">
+					  <div class="form-group">
+						<input type="email" name="username" id="username" tabindex="1" class="form-control" placeholder="Username" value=""  required>
+					  </div>
+					  <div class="form-group">
+						<input type="password" name="password" id="password" tabindex="2" class="form-control" placeholder="Password"> 
+					  </div>
+					  <div class="col-xs-12 form-group pull-right">     
+							<button type="submit" name="login-submit" id="login-submit" tabindex="4" class="form-control btn btn-primary">
+							 <span class="spinner"><i class="icon-spin icon-refresh" id="spinner"></i></span> Log In
+							</button>
+					  </div>
+				  </form>
+				</div>
+			</div>
+		</div>
+		</div>
+	</div>
+</div>
+//.......Create MySQL Database and table For PHP Login.......//
+--
+-- Table structure for table `tbl_users`
+--
+
+CREATE TABLE IF NOT EXISTS `tbl_users` (
+`id` int(11) NOT NULL,
+  `user` varchar(255) DEFAULT NULL,
+  `password` varchar(100) DEFAULT NULL,
+  `email` varchar(255) DEFAULT NULL,
+  `profile_photo` varchar(200) DEFAULT NULL,
+  `active` tinyint(1) NOT NULL
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+//create sample data
+INSERT INTO `tbl_users` (`id`, `user`, `password`, `email`, `profile_photo`, `active`) VALUES
+(1, 'phpflow', 'cc03e747a6afbbcbf8be7668acfebee5', 'test@login.com', NULL, 1)
+//.........connect/db_cls_connect.php........//
 <?php
-include_once("../db_connect.php");
-if(isset($_POST['btn-save'])) {
-$user_name = $_POST['user_name'];
-$user_email = $_POST['user_email'];
-$user_password = $_POST['password'];
-$sql = "SELECT email FROM users WHERE email='$user_email'";
-$resultset = mysqli_query($conn, $sql) or die("database error:". mysqli_error($conn));
-$row = mysqli_fetch_assoc($resultset);
-if(!$row['email']){
-$sql = "INSERT INTO users(`uid`, `user`, `pass`, `email`, `profile_photo`) VALUES (NULL, '$user_name', '$user_password', '$user_email', NULL)";
-mysqli_query($conn, $sql) or die("database error:". mysqli_error($conn)."qqq".$sql);
-echo "registered";
-} else {
-echo "1";
+session_start();
+Class dbObj{
+	/* Database connection start */
+	var $servername = "localhost";
+	var $username = "root";
+	var $password = "";
+	var $dbname = "test";
+	var $conn;
+	function getConnstring() {
+		$con = mysqli_connect($this->servername, $this->username, $this->password, $this->dbname) or die("Connection failed: " . mysqli_connect_error());
+
+		/* check connection */
+		if (mysqli_connect_errno()) {
+			printf("Connect failed: %s\n", mysqli_connect_error());
+			exit();
+		} else {
+			$this->conn = $con;
+		}
+		return $this->conn;
+	}
 }
-}
+
 ?>
-
-
-
-
-
+//..........PHP login Form Validation Using jQuery Validation......//
+$(document).ready(function(){
+	/* handling form validation */
+	$("#login-form").validate({
+		rules: {
+		password: {
+		required: true,
+		},
+		username: {
+		required: true,
+		email: true
+		},
+		},
+		messages: {
+		password:{
+	  required: "Please enter your password"
+	 },
+		username: "Please enter your email address",
+		},
+		submitHandler: submitForm	
+	});
+//.....Create submit login method into common.js file.....//
+function submitForm() {		
+		var data = $("#login-form").serialize();
+		$.ajax({		
+		type : 'POST',
+		url  : 'response.php?action=login',
+		data : data,
+		beforeSend: function(){	
+		$("#error").fadeOut();
+		$("#login_button").html('<span class="glyphicon glyphicon-transfer"></span> &nbsp; sending ...');
+		},
+		success : function(response){		
+		if($.trim(response) === "1"){
+		console.log('dddd');		
+		$("#login-submit").html('Signing In ...');
+		setTimeout(' window.location.href = "dashboard.php"; ',2000);
+		} else {		
+		$("#error").fadeIn(1000, function(){		
+		$("#error").html(response).show();
+		});
+		}
+		}
+		});
+		return false;
+	}
+ //.....Created login method into response.php file.....//
+ //include connection file 
+include_once("connect/db_cls_connect.php");
+$db = new dbObj();
+$connString =  $db->getConnstring();
  
+$params = $_REQUEST;
+$action = $params['action'] !='' ? $params['action'] : '';
+$empCls = new Employee($connString);
+ 
+switch($action) {
+ case 'login':
+	$empCls->login();
+ break;
+ default:
+ return;
+ class Employee {
+	protected $conn;
+	protected $data = array();
+	function __construct($connString) {
+		$this->conn = $connString;
+	}
+	
+	function login() {
+		if(isset($_POST['login-submit'])) {
+		$user_email = trim($_POST['username']);
+		$user_password = trim($_POST['password']);
+		$sql = "SELECT id, user, password, email FROM tbl_users WHERE email='$user_email'";
+		$resultset = mysqli_query($this->conn, $sql) or die("database error:". mysqli_error($this->conn));
+		$row = mysqli_fetch_assoc($resultset);
+		if(md5($user_password) == $row['password']){
+		echo "1";
+		$_SESSION['user_session'] = $row['user'];
+		} else {
+		echo "Ohhh ! Wrong Credential."; // wrong details
+		}
+		}
+	}
+}
+}
+//..........dashboard.php....//
+<!DOCTYPE html>
+<html>\
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="libs/common.css">
+<script type="text/javascript" charset="utf8" src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.0.3.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.17.0/jquery.validate.min.js"></script>
+<script type="text/javascript" src="libs/common.js"></script>
+<title>phpflow.com - Simple Example of Login System using PHP and MySQL</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+body {
+    font-size: 16px !important;
+    line-height: 25px !important;
+}
+</style>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-25916786-1', 'phpflow.com');
+  ga('send', 'pageview');
+
+</script>
+
+</head>
+<body class="">
+<div role="navigation" class="navbar navbar-default navbar-static-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button data-target=".navbar-collapse" data-toggle="collapse" class="navbar-toggle" type="button">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a href="#" class="navbar-brand"></a>
+        </div>
+        <div class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#">Home</a></li>
+           
+          </ul>
+         
+        </div><!--/.nav-collapse -->
+      </div>
+    </div>
+	
+	<div class="container" style="min-height:500px;">
+		   
+	<div class="container">
+	<div class="row">
+	
+        
+    <h1>Creative User Profile <br></h1>
+	<!-- Contenedor -->
+	<ul id="accordion" class="accordion">
+    <li>
+<div class="col col_4 iamgurdeep-pic">
+<img class="img-responsive iamgurdeeposahan" alt="iamgurdeeposahan" src="https://cdn-images-1.medium.com/max/2000/1*k_HvuYIVDODaXLxeFAs2uQ.jpeg">
+<div class="edit-pic">
+<a href="" target="_blank" class="fa fa-facebook"></a>
+<a href="" target="_blank" class="fa fa-instagram"></a>
+<a href="" target="_blank" class="fa fa-twitter"></a>
+<a href="" target="_blank" class="fa fa-google"></a>
+
+
+
+</div>
+<div class="username">
+    <h2>Hi <small><i class="fa fa-map-marker"></i> India </small></h2>
+    <p><i class="fa fa-briefcase"></i> Web Design and Development.</p>
+    
+    <a href="https://web.facebook.com/iamgurdeeposahan" target="_blank" class="btn-o"> <i class="fa fa-user-plus"></i> Add Friend </a>
+    <a href="https://www.instagram.com/gurdeeposahan/" target="_blank"  class="btn-o"> <i class="fa fa-plus"></i> Follow </a>
+    
+    
+     <ul class="nav navbar-nav">
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown"><span class="fa fa-ellipsis-v pull-right"></span></a>
+          <ul class="dropdown-menu pull-right">
+            <li><a href="#">Video Call <i class="fa fa-video-camera"></i></a></li>
+            <li><a href="#">Poke <i class="fa fa-hand-o-right"></i></a></li>
+            <li><a href="#">Report <i class="fa fa-bug"></i></a></li>
+            <li><a href="#">Block <i class="fa fa-lock"></i></a></li>
+          </ul>
+        </li>
+      </ul>
+   
+</div>
+    
+</div>
+        
+    </li>
+		<li>
+			<div class="link"><i class="fa fa-globe"></i>About<i class="fa fa-chevron-down"></i></div>
+			<ul class="submenu">
+				<li><a href="#"><i class="fa fa-calendar left-none"></i> Date of Birth : 02/07/1997</a></li>
+				<li><a href="#">Address : INDIA,chennai</a></li>
+				<li><a href="mailto:srajasiva26@gmail.com">Email : srajasiva26@gmail.com</a></li>
+				<li><a href="#">Phone : +91 689543290</a></li>
+			</ul>
+		</li>
+		<li class="default open">
+			<div class="link"><i class="fa fa-code"></i>Professional Skills<i class="fa fa-chevron-down"></i></div>
+			<ul class="submenu">
+				<li><a href="#"><span class="tags">Adobe Photoshop</span> <span class="tags">Corel Draw</span> <span class="tags">CSS</span> <span class="tags">Css 3</span> 
+                <span class="tags">Graphic Design</span> <span class="tags">HTML</span> <span class="tags">HTML5</span> <span class="tags">JavaScript</span> 
+                <span class="tags">Twitter bootstrap</span> <span class="tags">bootstrap</span> <span class="tags">User Interface Design</span> <span class="tags">Wordpress</span></li></a>
+			</ul>
+		</li>
+		<li>
+			<div class="link"><i class="fa fa-picture-o"></i>Photos <small>1,120</small><i class="fa fa-chevron-down"></i></div>
+			<ul class="submenu">
+				<li class="photosgurdeep"><a href="#"><img class="img-responsive iamgurdeeposahan" alt="iamgurdeeposahan" src="http://www.webncc.in/images/gurdeeposahan.jpg">                 
+				</a>
+                <a href="#"><img class="img-responsive iamgurdeeposahan" alt="iamgurdeeposahan" src="http://www.webncc.in/images/gurdeeposahan.jpg">                 
+    			</a>
+                <a href="#"><img class="img-responsive iamgurdeeposahan" alt="iamgurdeeposahan" src="http://www.webncc.in/images/gurdeeposahan.jpg">                 
+    			</a>
+                <a href="#"><img class="img-responsive iamgurdeeposahan" alt="iamgurdeeposahan" src="http://www.webncc.in/images/gurdeeposahan.jpg">                 
+    			</a>
+               
+                <a class="view-all" href="https://web.facebook.com/iamgurdeeposahan" target="_blank" >15+
+        		</a>
+    			    
+				</li>
+			</ul>
+		</li>
+		<li><div class="link"><i class="fa fa-users"></i>Friends <small>1,053</small><i class="fa fa-chevron-down"></i></div>
+			<ul class="submenu">
+    			<li class="photosgurdeep"><a href="#"><img class="img-responsive iamgurdeeposahan" alt="iamgurdeeposahan" src="http://www.webncc.in/images/gurdeeposahan.jpg">                 
+				</a>
+                <a href="#"><img class="img-responsive iamgurdeeposahan" alt="iamgurdeeposahan" src="http://www.webncc.in/images/gurdeeposahan.jpg">                 
+    			</a>
+                <a href="#"><img class="img-responsive iamgurdeeposahan" alt="iamgurdeeposahan" src="http://www.webncc.in/images/gurdeeposahan.jpg">                 
+    			</a>
+                <a href="#"><img class="img-responsive iamgurdeeposahan" alt="iamgurdeeposahan" src="http://www.webncc.in/images/gurdeeposahan.jpg">                 
+    			</a>
+                <a href="#"><img class="img-responsive iamgurdeeposahan" alt="iamgurdeeposahan" src="http://www.webncc.in/images/gurdeeposahan.jpg">                 
+        		</a>
+                <a href="#"><img class="img-responsive iamgurdeeposahan" alt="iamgurdeeposahan" src="http://www.webncc.in/images/gurdeeposahan.jpg">                 
+    			</a>
+                <a href="#"><img class="img-responsive iamgurdeeposahan" alt="iamgurdeeposahan" src="http://www.webncc.in/images/gurdeeposahan.jpg">                 
+    			</a>
+                <a href="#"><img class="img-responsive iamgurdeeposahan" alt="iamgurdeeposahan" src="http://www.webncc.in/images/gurdeeposahan.jpg">                 
+        		</a>
+                <a href="#"><img class="img-responsive iamgurdeeposahan" alt="iamgurdeeposahan" src="http://www.webncc.in/images/gurdeeposahan.jpg">                 
+    			</a>
+               
+                <a class="view-all" href="https://web.facebook.com/iamgurdeeposahan" target="_blank">50+
+        		</a>
+    			    
+				</li>
+			</ul>
+		</li>
+		<li><a href="response.php?action=logout" class="btn btn-default btn-sm">
+          Logout
+        </a></li>
+	</ul>
+	</div>
+    
+    
+    
+ 
+    
+</div>
+//......Created logout method into response.php file....//
+case 'logout':
+	$empCls->logout();
+ break;
+ function logout() {
+		unset($_SESSION['user_session']);
+		if(session_destroy()) {
+		header("Location: index.php");
+		}
+	}
+ //.....index.php.....//
+ <html>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"/>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.0/css/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="libs/common.css">
+<script type="text/javascript" charset="utf8" src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-2.0.3.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.17.0/jquery.validate.min.js"></script>
+<script type="text/javascript" src="libs/common.js"></script>
+<title>phpflow.com - Simple Example of Login System using PHP and MySQL</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
